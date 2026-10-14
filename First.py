@@ -27,7 +27,7 @@ bob_bit = int(next(iter(counts)))
 print("Bob's measured bit:", bob_bit)
 print("Bases match:", x == z)
 
-if x == z:
+if x==z:
     print("Ideal channel: Bob should recover Alice's bit.")
 else:
     print("Bases differ: Bob's result is random.")
