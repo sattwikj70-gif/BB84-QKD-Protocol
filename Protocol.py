@@ -12,16 +12,17 @@ if x==1:
     qc.h(q[0])
 if y==1:
     qc.x(q[0])
+qc.barrier(label="1")
 if z==1:
     qc.h(q[0])
 qc.measure(q[0], c[0])
 qc.draw('mpl')
+plt.text( 0.05, -1.6, "1:Alice's Process")
 plt.show()
-simulator = AerSimulator()
-compiled = transpile(qc, simulator)
-result = simulator.run(compiled, shots=1).result()
-counts = result.get_counts()
-
+simulator=AerSimulator()
+compiled=transpile(qc,simulator)
+result=simulator.run(compiled,shots=1).result()
+counts=result.get_counts()
 bob_bit = int(next(iter(counts)))
 
 print("Bob's measured bit:", bob_bit)
