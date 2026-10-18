@@ -1,50 +1,38 @@
-import matplotlib.pyplot as plt
-from random import randint
+from gc import get_count
+
+import numpy as np
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister,transpile
 from qiskit_aer import AerSimulator
-c=ClassicalRegister(1)
+
+rng = np.random.default_rng()
+N=100_000
+alice_bits = rng.integers(0, 2, size=N)
+alice_basis = rng.integers(0, 2, size=N)# 0 = Z basis, 1 = X basis
+bob_basis = rng.integers(0, 2, size=N)
+c=ClassicalRegister(N)
 q=QuantumRegister(1)
 qc=QuantumCircuit(q,c)
-Alice_Basis=[]
-Bob_Basis=[]
-bobs_bits=[]
-Alices_bits=[]
-Alice_key=[]
-Bob_key=[]
-simulator = AerSimulator()
-for i in range(10):
-    x = randint(0, 1)
-    y = randint(0, 1)
-    z = randint(0, 1)
-    if x==1:
+for i in range(N):
+    qc.reset(q[0])
+    if alice_bits[i]:
         qc.x(q[0])
-        Alices_bits.append(1)
-    else:
-        Alices_bits.append(0)
-    if y==1:
+    if alice_basis[i]:
         qc.h(q[0])
-        Alice_Basis.append('X')
-    else:
-        Alice_Basis.append('Z')
-
-    qc.barrier(label="1")
-    if z==1:
+    if bob_basis[i]:
         qc.h(q[0])
-        Bob_Basis.append('X')
-    else:
-        Bob_Basis.append('Z')
-    qc.measure(q[0], c[0])
-    compiled = transpile(qc, simulator)
-    result = simulator.run(compiled, shots=1).result()
-    counts = result.get_counts()
-    bobs_bits.append(int(next(iter(counts))))
-    qc.clear()
-print(Alice_Basis,Bob_Basis)
-print(Alices_bits,bobs_bits)
-#Sifting process
-for i in range(10):
-    if Alice_Basis[i]==Bob_Basis[i]:
-        Alice_key.append(Alices_bits[i])
-        Bob_key.append(bobs_bits[i])
-print(Alice_key,Bob_key)
-
+    qc.measure(q[0], c[i])
+simulator = AerSimulator()
+compiled = transpile(qc, simulator, optimization_level=0)
+result = simulator.run(compiled, shots=1, memory=True).result()
+measured = result.get_memory()[0][::-1]
+bob_bits = np.fromiter(
+    (int(bit) for bit in measured), dtype=np.int8, count=N
+)
+matching = alice_basis == bob_basis
+alice_key = alice_bits[matching]
+bob_key = bob_bits[matching]
+print("Transmitted bits:", N)
+print("Matching bases:", np.sum(matching))
+print("Alice's sifted key:", alice_key)
+print("Bob's sifted key:", bob_key)
+print("Keys identical:", np.array_equal(alice_key, bob_key))
