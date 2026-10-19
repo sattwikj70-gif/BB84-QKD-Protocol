@@ -1,9 +1,7 @@
-from gc import get_count
-
 import numpy as np
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister,transpile
 from qiskit_aer import AerSimulator
-
+from Noise import noise_creation
 rng = np.random.default_rng()
 N=100_000
 alice_bits = rng.integers(0, 2, size=N)
@@ -21,7 +19,8 @@ for i in range(N):
     if bob_basis[i]:
         qc.h(q[0])
     qc.measure(q[0], c[i])
-simulator = AerSimulator()
+noise_model=noise_creation(0.1)
+simulator = AerSimulator(noise_model=noise_model)
 compiled = transpile(qc, simulator, optimization_level=0)
 result = simulator.run(compiled, shots=1, memory=True).result()
 measured = result.get_memory()[0][::-1]
@@ -33,6 +32,13 @@ alice_key = alice_bits[matching]
 bob_key = bob_bits[matching]
 print("Transmitted bits:", N)
 print("Matching bases:", np.sum(matching))
-print("Alice's sifted key:", alice_key)
-print("Bob's sifted key:", bob_key)
-print("Keys identical:", np.array_equal(alice_key, bob_key))
+#QBER calculation
+index=rng.choice(np.sum(matching), size=500, replace=False)
+vfa=alice_key[index]
+vfb=bob_key[index]
+new_alice_key=np.delete(alice_key,index)
+new_bob_key=np.delete(bob_key,index)
+sacrificed_bits= vfa==vfb
+x=np.sum(sacrificed_bits)
+qber=(500-x)/500
+print('Qber=',qber*100)
