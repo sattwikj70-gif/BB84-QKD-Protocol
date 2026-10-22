@@ -47,9 +47,9 @@ print("Matching bases:", np.sum(matching))
 index=rng.choice(np.sum(matching), size=5000, replace=False)
 vfa=alice_key[index]
 vfb=bob_key[index]
-new_alice_key=np.delete(alice_key,index)
-new_bob_key=np.delete(bob_key,index)
 sacrificed_bits= vfa==vfb
 x=np.sum(sacrificed_bits)
 qber=(5000-x)/5000
 print('Qber=',qber*100)
+alice_key_after_sifting=np.delete(alice_key,index)
+bob_key_after_sifting=np.delete(bob_key,index)
