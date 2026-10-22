@@ -27,7 +27,7 @@ for i in range(N):
     if bob_basis[i]:
         qc.h(q[0])
     qc.measure(q[0], c[i])
-noise_model=noise_creation(0.1)
+noise_model=noise_creation(0)
 simulator = AerSimulator(noise_model=noise_model)
 compiled = transpile(qc, simulator, optimization_level=0)
 result = simulator.run(compiled, shots=1, memory=True).result()
