@@ -105,10 +105,7 @@ Several parameters can be modified to investigate the behaviour of the protocol.
 
 ## Future Improvements
 
-- Implement finite-key security analysis.
 - Investigate optimized LDPC code constructions.
 - Study the relationship between eavesdropping probability and QBER.
-- Analyse the effects of individual quantum channel noise mechanisms.
 - Implement efficient Toeplitz hashing for larger key sizes.
-- Calculate and visualize the final secret key rate.
 - Compare simulated results with theoretical BB84 predictions.
