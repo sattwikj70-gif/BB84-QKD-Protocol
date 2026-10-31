@@ -56,7 +56,26 @@ BB84-QKD-Simulation/
 | Qiskit Aer | Quantum circuit simulation |
 | SciPy | Sparse matrix operations |
 | LDPC | Belief Propagation and LSD decoding |
+## Installation
 
+Clone the repository:
+
+```bash
+git clone https://github.com/sattwikj70-gif/BB84-QKD-Protocol.git
+cd BB84-QKD-Simulation
+```
+
+Install the required dependencies:
+
+```bash
+pip install numpy scipy qiskit qiskit-aer ldpc
+```
+
+Run the simulation:
+
+```bash
+python Protocol.py
+```
 ## Key Parameters
 
 Several parameters can be modified to investigate the behaviour of the protocol.
