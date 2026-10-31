@@ -78,15 +78,48 @@ else:
     print("Published syndrome bits:", leakage)
 
     if success:
-        # Simulation-only diagnostic.
-        residual_errors = np.count_nonzero(alice_ec != bob_ec)
-
-        print("Syndrome decoding succeeded.")
-        print("Residual errors:", residual_errors)
-        print(
-            "Residual QBER (%):",
-            100 * residual_errors / len(alice_ec)
-            if len(alice_ec) else float("nan")
+        from PrivacyAmplification import (
+            privacy_amplification,
+            calculate_key_length
         )
-    else:
-        print("LDPC decoding failed; discard this block.")
+
+        # Check actual reconciliation, not just syndrome agreement.
+        if not np.array_equal(alice_ec, bob_ec):
+            print("Reconciliation verification failed.")
+        else:
+            print("Reconciliation verified.")
+
+            # Calculate the privacy-amplified key length.
+            key_length = calculate_key_length(
+                input_length=len(alice_ec),
+                qber=qber,
+                leakage_ec=leakage,
+                epsilon_pa=1e-10
+            )
+
+            if key_length == 0:
+                print("Insufficient entropy for a secret key.")
+
+            else:
+                # Alice chooses the public Toeplitz seed.
+                alice_final, seed = privacy_amplification(
+                    alice_ec,
+                    key_length
+                )
+
+                # Bob uses exactly the same public seed.
+                bob_final, _ = privacy_amplification(
+                    bob_ec,
+                    key_length,
+                    seed=seed
+                )
+
+                print("Reconciled key length:", len(alice_ec))
+                print("Final key length:", key_length)
+
+                print(
+                    "Alice and Bob final keys match:",
+                    np.array_equal(alice_final, bob_final)
+                )
+
+                print("Final secret key:", alice_final)
